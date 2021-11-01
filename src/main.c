@@ -127,7 +127,30 @@ void displayFoldersLevelOrder(Folders *root)
     printf("\n");
 }
 
-void deleteDStruct(Folders *r) {}
+int countLevel(char* path) {
+    int level = 0;
+    for(int i = 0; path[i]; i++) {
+        if(path[i]=='/')
+            level++;
+    }
+    return level;
+}
+
+void deleteDStruct(Folders *r) {
+    // follow the postorder removal
+    if (r) {
+        for (int i =0; i<MAX_ITEMS_IN_DIRECTORY;i++) {
+            if (r->fileLinks[i]) {
+                deleteDStruct(r->fileLinks[i]);
+            }else {
+                break;
+            }
+        }
+        // all the children are in the stack remove the root
+        // printf("Removing the folder name: %d\n",r->folderName);
+        free(r);
+    }
+}
 
 int main(int argc, char const *argv[])
 {
@@ -142,8 +165,8 @@ int main(int argc, char const *argv[])
     // check the path
     char path[100];
     scanf("%s",path);
-    int level;
-    scanf("%d",&level);
+    // 12121/12121/ => count the number of /
+    int level = countLevel(path);
     printf("Path reached: %s\n",findDirectory(path,level));
 
     deleteDStruct(root);
