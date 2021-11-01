@@ -1,24 +1,32 @@
+/**
+ * to create file structure like linux
+ * just to display and store the file structure
+ * @author Dipankar Das
+ * @version 1.0
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_ITEMS_IN_DIRECTORY 11
-
+#define MAX_STRING_FILE_NAME 30
 /**
- * using b+tree structure
+ * using b+ tree structure or 11 child tree 
  */
 
 typedef struct folders
 {
-    int folderName;
+    char folderName[MAX_STRING_FILE_NAME];
     struct folders *fileLinks[MAX_ITEMS_IN_DIRECTORY]; // store the folder name as integer values at first
 } Folders;
 #include "../src/queue.h"
 
-Folders *createMemory(int folderName)
+Folders *createMemory(char *folderName)
 {
     Folders *tmp = (Folders *)malloc(sizeof(Folders));
-    tmp->folderName = folderName;
+    // tmp->folderName = folderName;
+    strncpy(tmp->folderName,folderName,MAX_STRING_FILE_NAME);
     for (int i = 0; i < MAX_ITEMS_IN_DIRECTORY; i++)
         tmp->fileLinks[i] = NULL;
 
@@ -27,23 +35,22 @@ Folders *createMemory(int folderName)
 
 void createFileFolders(Folders **root)
 {
-    // folder name 1 is the root
-    if (!(*root))
-    {
-        *root = createMemory(1);
+    if (!(*root)) {
+        *root = createMemory("root");
     }
-    (*root)->fileLinks[0] = createMemory(2);
-    (*root)->fileLinks[1] = createMemory(3);
-    (*root)->fileLinks[2] = createMemory(4);
-    (*root)->fileLinks[3] = createMemory(5);
-    (*root)->fileLinks[4] = createMemory(6);
-    (*root)->fileLinks[5] = createMemory(7);
+
+    (*root)->fileLinks[0] = createMemory("usr");
+    (*root)->fileLinks[1] = createMemory("sys");
+    (*root)->fileLinks[2] = createMemory("bin");
+    (*root)->fileLinks[3] = createMemory("mnt");
+    (*root)->fileLinks[4] = createMemory("tmp");
+    (*root)->fileLinks[5] = createMemory("etc");
     // testing it
-    (*root)->fileLinks[0]->fileLinks[0] = createMemory(221);
+    (*root)->fileLinks[0]->fileLinks[0] = createMemory("include");
 
-    (*root)->fileLinks[5]->fileLinks[0] = createMemory(551);
+    (*root)->fileLinks[5]->fileLinks[0] = createMemory("passwd");
 
-    (*root)->fileLinks[0]->fileLinks[0]->fileLinks[0] = createMemory(222221);
+    (*root)->fileLinks[0]->fileLinks[0]->fileLinks[0] = createMemory("linux");
 }
 
 // traversal level order fashion
@@ -98,6 +105,7 @@ char *findDirectory(char *path, int level)
             pointer++;
         }
     }
+    return '\0';
 }
 
 void displayFoldersLevelOrder(Folders *root)
@@ -112,7 +120,7 @@ void displayFoldersLevelOrder(Folders *root)
         pop();
 
         // print it
-        printf("%d ", root->folderName);
+        printf("%s ", root->folderName);
 
         for (int i = 0; i < MAX_ITEMS_IN_DIRECTORY; i++)
         {
@@ -152,22 +160,51 @@ void deleteDStruct(Folders *r) {
     }
 }
 
+void displayAdvance(Folders *root) {
+    if (root) {
+        // using the preorder printing the root first then all the children
+        printf("|- %s\n",root->folderName);
+
+        for(int i = 0; i<MAX_ITEMS_IN_DIRECTORY && root->fileLinks[i];i++) {
+            printf("|  |- %s\n",root->fileLinks[i]->folderName);
+        }
+        printf("|\n");
+        for(int i = 0; i<MAX_ITEMS_IN_DIRECTORY && root->fileLinks[i];i++) {
+            displayAdvance(root->fileLinks[i]);
+        }
+    }
+}
+
+void welcomePage() {
+    system("clear");
+    printf("Rules:\n");
+    printf("1. no spaces allowed\n");
+    printf("2. if directory then end with /\n\t|- eg. home/user/Desktop/\n");
+    printf("3. Any folder can contain only 11 files inside it\n");
+    printf("------------------------\n");
+}
+
 int main(int argc, char const *argv[])
 {
+    welcomePage();
     Folders *root = NULL;
     createFileFolders(&root);
-    // intermediate step is to index it
-    // indexingNo_of_Folder(&root); // for now only the root has children
+    // displayFoldersLevelOrder(root);
 
-    // display
-    displayFoldersLevelOrder(root);
-
-    // check the path
+    // check the path length is max 100
     char path[100];
+    printf("Demo to pick the file to search..");
+    printf("Enter the path -> ");
     scanf("%s",path);
     // 12121/12121/ => count the number of /
     int level = countLevel(path);
     printf("Path reached: %s\n",findDirectory(path,level));
+
+
+    /**
+     * testing the new Display
+     */
+    displayAdvance(root);
 
     deleteDStruct(root);
     return EXIT_SUCCESS;

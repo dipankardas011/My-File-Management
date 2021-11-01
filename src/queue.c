@@ -35,6 +35,7 @@ Queue *createNodesForQueue(void *address) {
     Queue *t = (Queue *)malloc(sizeof(Queue));
     t->data = address;
     t->next = NULL;
+    return t;
 }
 
 void display() {
@@ -42,7 +43,7 @@ void display() {
         printf("[");
         Queue *f = frontPointerQueue;
         do {
-            printf("%d",((Folders*)f->data)->folderName);
+            // printf("%s",((Folders*)f->data)->folderName);
             f = f->next;
         }while (f != NULL && printf(", "));
         printf("]\n");
